@@ -1,4 +1,4 @@
-package cli
+package cmd
 
 import tea "github.com/charmbracelet/bubbletea"
 
@@ -22,6 +22,11 @@ func (m *CliTool) View() string {
 
 func InitGoplyr() *CliTool {
 	c := &CliTool{}
+
+	c.windowName = "PLAYER"
+	c.windows = map[string]Window{
+		"PLAYER": InitPlayerWindow(),
+	}
 
 	return c
 }
