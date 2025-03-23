@@ -1,6 +1,9 @@
 package player
 
-import "github.com/hajimehoshi/oto"
+import (
+	"github.com/hajimehoshi/oto"
+	"log"
+)
 
 type Player struct {
 	player   oto.Player
@@ -23,5 +26,8 @@ func (p *Player) Play() {
 }
 
 func (p *Player) Stop() {
-	p.player.Close()
+	err := p.player.Close()
+	if err != nil {
+		log.Fatal("Failed to stop the song")
+	}
 }
