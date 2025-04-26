@@ -31,11 +31,18 @@ const (
 	SHUFFLE
 )
 
+const (
+	PAUSE PlaybackStatus = iota
+	PLAY
+)
+
 type (
-	PlaybackMode int
-	PlayerState  struct {
-		playbackMode *PlaybackMode
-		timestamp    string
-		volume       int
+	PlaybackMode   int
+	PlaybackStatus int
+	PlayerState    struct {
+		playbackMode   *PlaybackMode
+		playbackStatus *PlaybackStatus
+		timestamp      string
+		volume         int
 	}
 )

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	// "log"
 
 	"github.com/Shreyaskr1409/goplyr/cmd/util"
 
@@ -43,12 +44,13 @@ func InitPlayerWindow() *PlayerWindow {
 }
 
 func (p *PlayerWindow) Init() tea.Cmd {
+	p.width = 40
+	p.height = 40
+
 	util.MsgAppendln(&p.messages, fmt.Sprint("SONG:     ", p.song.song))
 	util.MsgAppendln(&p.messages, fmt.Sprint("ALBUM:    ", p.song.album))
 	util.MsgAppendln(&p.messages, fmt.Sprint("ARTIST:   ", p.song.artist))
 	util.MsgAppend(&p.messages, fmt.Sprint("DURATION: ", p.song.duration))
-	// in above paragraph, in last line, i removed the new line part as it was creating
-	// unnecessary new line when displayed in the bottom
 
 	return nil
 }
@@ -70,15 +72,36 @@ func (p *PlayerWindow) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (p *PlayerWindow) View() string {
-	stylePage := lipgloss.NewStyle().Width(p.width).Height(p.height).Align(lipgloss.Left, lipgloss.Bottom)
-	styleContent := lipgloss.NewStyle().AlignHorizontal(lipgloss.Left)
+	stylePage := lipgloss.NewStyle().Width(p.width).Height(p.height)
 	page := ""
+	page = fmt.Sprint(page, stylePage.Render(p.PlayerSummary()))
+
+	return page
+}
+
+func (p *PlayerWindow) PlayerSummary() string {
+	styleBox := lipgloss.NewStyle().Width(int(float32(p.width)/3.5)-2).Height(p.height-2).Align(lipgloss.Left, lipgloss.Top).Padding(1, 2).Border(lipgloss.NormalBorder())
+
+	// innerH := p.height - 4
+	// innerW := p.width - 4
+
+	playerSummary := ""
+	styleContent := lipgloss.NewStyle().AlignHorizontal(lipgloss.Left)
+	styleASCII := lipgloss.NewStyle().AlignHorizontal(lipgloss.Center)
 	s := ""
+
+	ascii, err := util.ImageToASCII("./test_art2.png", 20, 9)
+	if err != nil {
+		fmt.Println("Error:", err)
+		ascii = util.GenerateFallbackASCII(uint(p.width/4-2), uint(p.width/4-2))
+	}
 
 	for i := range p.messages {
 		s = fmt.Sprint(s, p.messages[i])
 	}
-	page = fmt.Sprint(page, stylePage.Render(styleContent.Render(s)))
 
-	return page
+	playerSummary = fmt.Sprint(playerSummary, styleBox.Render(
+		fmt.Sprint(styleASCII.Render(ascii), "\n", styleContent.Render(s))))
+
+	return playerSummary
 }
