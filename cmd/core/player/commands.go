@@ -18,6 +18,7 @@ func (p *Player) Resume() {
 
 func (p *Player) Stop() {
 	if p.player != nil {
+		log.Println("Looking for Stop condition to be fulfilled")
 		err := p.player.Close()
 		if err != nil {
 			log.Println("Error in closing the player: ", err)

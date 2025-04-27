@@ -29,7 +29,7 @@ type PlayerWindow struct {
 func InitPlayerWindow() *PlayerWindow {
 	pw := &PlayerWindow{}
 	playbackMode := NONE
-	playbackStatus := PLAY
+	playbackStatus := PAUSE
 
 	pw.song = &Song{
 		song:        "Instant Crush (feat. Julian Casablancas)",
@@ -77,7 +77,13 @@ func (p *PlayerWindow) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			if p.audioPlayer != nil {
-				p.audioPlayer.Stop()
+				log.Println("Condition 1 matched")
+				if *p.playerState.playbackStatus == PLAY {
+					*p.playerState.playbackStatus = PAUSE
+					p.audioPlayer.Pause()
+					// NOT USING STOP FOR NOW DUE TO NULL PTR DEFERENCE ERROR
+					// p.audioPlayer.Stop()
+				}
 			}
 			return p, tea.Quit
 		case "ctrl+p", " ":
