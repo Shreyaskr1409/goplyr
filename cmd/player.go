@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"strings"
+
 	// "log"
 
+	"github.com/Shreyaskr1409/goplyr/cmd/core/player"
 	"github.com/Shreyaskr1409/goplyr/cmd/util"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -66,6 +68,12 @@ func (p *PlayerWindow) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return p, tea.Quit
+		case "ctrl+p":
+			if *p.playerState.playbackStatus == PLAY {
+				// CODE TO PLAY THE SONG
+			} else {
+				// CODE TO PLAY THE SONG
+			}
 		}
 
 	case tea.WindowSizeMsg:
