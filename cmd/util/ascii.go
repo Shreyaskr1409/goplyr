@@ -14,36 +14,6 @@ import (
 	_ "image/png"
 )
 
-// const asciiChars = " .,:;+*?%S#@"
-//
-// func ImageToASCII(imagePath string, width, height uint) (string, error) {
-// 	// Validate dimensions
-// 	log.Println("Requested dimensions:", int(width), "x", int(height))
-//
-// 	if width == 0 || height == 0 {
-// 		return "", fmt.Errorf("dimensions must be positive (got %dx%d)", width, height)
-// 	}
-//
-// 	// Load image
-// 	img, err := loadImage(imagePath)
-// 	if err != nil {
-// 		return "", err
-// 	}
-//
-// 	// Configure the image2ascii converter
-// 	converter := convert.NewImageConverter()
-// 	options := convert.DefaultOptions
-// 	options.FixedWidth = int(width)
-// 	options.FixedHeight = int(height)
-// 	options.FitScreen = false // we control size manually
-//
-// 	ascii := converter.Image2ASCIIString(img, &options)
-//
-// 	return ascii, nil
-// }
-
-const asciiChars = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,^`'. "
-
 func ImageToASCII(imagePath string, width, height uint) (string, error) {
 	log.Println("Requested dimensions:", int(width), "x", int(height))
 	if width == 0 || height == 0 {
@@ -103,6 +73,7 @@ func safeDimensions(requested int) uint {
 }
 
 func GenerateFallbackASCII(width, height uint) string {
+	const asciiChars = "\u2588\u2593\u2592"
 	var sb strings.Builder
 	for y := uint(0); y < height; y++ {
 		for x := uint(0); x < width; x++ {

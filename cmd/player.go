@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 	// "log"
 
 	"github.com/Shreyaskr1409/goplyr/cmd/util"
@@ -25,19 +26,21 @@ type PlayerWindow struct {
 func InitPlayerWindow() *PlayerWindow {
 	pw := &PlayerWindow{}
 	playbackMode := NONE
+	playbackStatus := PLAY
 
 	pw.song = &Song{
-		song:        "Norway",
-		album:       "Teen Dream",
-		artist:      "Beach House",
-		duration:    "3:54",
-		year:        "2010",
+		song:        "Instant Crush",
+		album:       "Random Access Memories",
+		artist:      "Daft Punk",
+		duration:    "5:38",
+		year:        "2013",
 		albumArtURI: "",
 	}
 	pw.playerState = &PlayerState{
-		playbackMode: &playbackMode,
-		timestamp:    "00:00",
-		volume:       100,
+		playbackMode:   &playbackMode,
+		playbackStatus: &playbackStatus,
+		timestamp:      "00:00",
+		volume:         100,
 	}
 
 	return pw
@@ -50,7 +53,7 @@ func (p *PlayerWindow) Init() tea.Cmd {
 	util.MsgAppendln(&p.messages, fmt.Sprint("SONG:     ", p.song.song))
 	util.MsgAppendln(&p.messages, fmt.Sprint("ALBUM:    ", p.song.album))
 	util.MsgAppendln(&p.messages, fmt.Sprint("ARTIST:   ", p.song.artist))
-	util.MsgAppend(&p.messages, fmt.Sprint("DURATION: ", p.song.duration))
+	util.MsgAppendln(&p.messages, fmt.Sprint("DURATION: ", p.song.duration))
 
 	return nil
 }
@@ -80,28 +83,64 @@ func (p *PlayerWindow) View() string {
 }
 
 func (p *PlayerWindow) PlayerSummary() string {
-	styleBox := lipgloss.NewStyle().Width(int(float32(p.width)/3.5)-2).Height(p.height-2).Align(lipgloss.Left, lipgloss.Top).Padding(1, 2).Border(lipgloss.NormalBorder())
+	boxWidth := int(float32(p.width) / 4)
+	boxHeight := p.height
+	paddingWidth := 2
+	paddingHeight := 1
 
-	// innerH := p.height - 4
-	// innerW := p.width - 4
+	styleBox := lipgloss.NewStyle().
+		Width(boxWidth-2).
+		Height(boxHeight-2).
+		Align(lipgloss.Left, lipgloss.Top).
+		Padding(paddingHeight, paddingWidth).
+		Border(lipgloss.NormalBorder())
+
+	innerWidth := boxWidth - 2 - paddingWidth*2    // 2 for borders and 4 for padding
+	artWidth := innerWidth - 2                     // 2 for borders and 4 for padding
+	artHeight := int(float32(innerWidth)*9/20) - 2 // 20 : 9 is the ratio which makes a square in my fonts
 
 	playerSummary := ""
 	styleContent := lipgloss.NewStyle().AlignHorizontal(lipgloss.Left)
-	styleASCII := lipgloss.NewStyle().AlignHorizontal(lipgloss.Center)
+	styleASCII := lipgloss.NewStyle().
+		AlignHorizontal(lipgloss.Center).
+		Width(artWidth).
+		Border(lipgloss.DoubleBorder())
 	s := ""
 
-	ascii, err := util.ImageToASCII("./test_art2.png", 20, 9)
+	ascii, err := util.ImageToASCII("./test_art3.png", uint(artWidth), uint(artHeight))
 	if err != nil {
 		fmt.Println("Error:", err)
 		ascii = util.GenerateFallbackASCII(uint(p.width/4-2), uint(p.width/4-2))
 	}
 
+	s = fmt.Sprint(s, strings.Repeat("\u2500", innerWidth), "\n")
 	for i := range p.messages {
 		s = fmt.Sprint(s, p.messages[i])
 	}
+	s = fmt.Sprint(s, strings.Repeat("\u2500", innerWidth))
 
-	playerSummary = fmt.Sprint(playerSummary, styleBox.Render(
-		fmt.Sprint(styleASCII.Render(ascii), "\n", styleContent.Render(s))))
+	controls := []string{
+		lipgloss.NewStyle().Foreground(lipgloss.Color("14")).Render("Play/Pause → Ctrl+P     "),
+		lipgloss.NewStyle().Foreground(lipgloss.Color("11")).Render("Exit       → Ctrl+C or Q"),
+	}
+
+	styleControls := lipgloss.NewStyle().AlignHorizontal(lipgloss.Center).
+		Width(innerWidth - 2).
+		Border(lipgloss.DoubleBorder()).
+		Background(lipgloss.Color("0")).
+		BorderBackground(lipgloss.Color("0"))
+	formattedControls := make([]string, len(controls))
+	for i, control := range controls {
+		formattedControls[i] = styleControls.Render(control)
+	}
+
+	playerSummary = fmt.Sprint(playerSummary,
+		styleBox.Render(fmt.Sprint(styleASCII.Render(ascii),
+			"\n",
+			styleContent.Render(s),
+			"\n",
+			styleControls.Render(strings.Join(controls, "\n")),
+		)))
 
 	return playerSummary
 }
