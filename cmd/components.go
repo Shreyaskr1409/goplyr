@@ -22,6 +22,7 @@ type Song struct {
 	duration    string
 	albumArtURI string
 	year        string
+	filepath    string
 }
 
 const (

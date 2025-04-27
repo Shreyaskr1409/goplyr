@@ -3,7 +3,6 @@ package util
 import (
 	"fmt"
 	"image"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -15,7 +14,6 @@ import (
 )
 
 func ImageToASCII(imagePath string, width, height uint) (string, error) {
-	log.Println("Requested dimensions:", int(width), "x", int(height))
 	if width == 0 || height == 0 {
 		return "", fmt.Errorf("dimensions must be positive (got %dx%d)", width, height)
 	}

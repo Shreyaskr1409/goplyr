@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"path/filepath"
 	"strings"
-
-	// "log"
 
 	"github.com/Shreyaskr1409/goplyr/cmd/core/player"
 	"github.com/Shreyaskr1409/goplyr/cmd/util"
@@ -19,6 +19,7 @@ type PlayerWindow struct {
 	playerState *PlayerState
 	player      oto.Player
 	pause       chan bool
+	audioPlayer *player.Player
 	isPaused    bool
 	width       int
 	height      int
@@ -37,6 +38,7 @@ func InitPlayerWindow() *PlayerWindow {
 		duration:    "5:38",
 		year:        "2013",
 		albumArtURI: "",
+		filepath:    "./samples/test_audio.mp3",
 	}
 	pw.playerState = &PlayerState{
 		playbackMode:   &playbackMode,
@@ -67,13 +69,12 @@ func (p *PlayerWindow) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			return p, tea.Quit
-		case "ctrl+p":
-			if *p.playerState.playbackStatus == PLAY {
-				// CODE TO PLAY THE SONG
-			} else {
-				// CODE TO PLAY THE SONG
+			if p.audioPlayer != nil {
+				p.audioPlayer.Stop()
 			}
+			return p, tea.Quit
+		case "ctrl+p", " ":
+			p.togglePlayback()
 		}
 
 	case tea.WindowSizeMsg:
@@ -90,6 +91,33 @@ func (p *PlayerWindow) View() string {
 	page = fmt.Sprint(page, stylePage.Render(p.PlayerSummary()))
 
 	return page
+}
+
+func (p *PlayerWindow) togglePlayback() {
+	if p.audioPlayer == nil {
+		log.Println("Error: Audio player not initialized")
+		return
+	}
+
+	if *p.playerState.playbackStatus == PLAY {
+		*p.playerState.playbackStatus = PAUSE
+		p.audioPlayer.Pause()
+	} else {
+		*p.playerState.playbackStatus = PLAY
+
+		if p.audioPlayer.IsPlaying() && p.audioPlayer.IsPaused() {
+			p.audioPlayer.Resume()
+		} else {
+			err := p.audioPlayer.PlayFile(p.song.filepath)
+			if err != nil {
+				log.Println("Failed to play audio: ", err)
+				*p.playerState.playbackStatus = PAUSE
+			} else {
+				fileName := filepath.Base(p.song.filepath)
+				p.song.song = fileName
+			}
+		}
+	}
 }
 
 func (p *PlayerWindow) PlayerSummary() string {
