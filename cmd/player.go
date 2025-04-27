@@ -29,7 +29,7 @@ func InitPlayerWindow() *PlayerWindow {
 	playbackStatus := PLAY
 
 	pw.song = &Song{
-		song:        "Instant Crush",
+		song:        "Instant Crush (feat. Julian Casablancas)",
 		album:       "Random Access Memories",
 		artist:      "Daft Punk",
 		duration:    "5:38",
@@ -49,11 +49,13 @@ func InitPlayerWindow() *PlayerWindow {
 func (p *PlayerWindow) Init() tea.Cmd {
 	p.width = 40
 	p.height = 40
+	keyStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color("0"))
 
-	util.MsgAppendln(&p.messages, fmt.Sprint("SONG:     ", p.song.song))
-	util.MsgAppendln(&p.messages, fmt.Sprint("ALBUM:    ", p.song.album))
-	util.MsgAppendln(&p.messages, fmt.Sprint("ARTIST:   ", p.song.artist))
-	util.MsgAppendln(&p.messages, fmt.Sprint("DURATION: ", p.song.duration))
+	util.MsgAppendln(&p.messages, fmt.Sprint(keyStyle.Render("SONG:    "), " ", p.song.song))
+	util.MsgAppendln(&p.messages, fmt.Sprint(keyStyle.Render("ALBUM:   "), " ", p.song.album))
+	util.MsgAppendln(&p.messages, fmt.Sprint(keyStyle.Render("ARTIST:  "), " ", p.song.artist))
+	util.MsgAppendln(&p.messages, fmt.Sprint(keyStyle.Render("DURATION:"), " ", p.song.duration))
 
 	return nil
 }
@@ -83,7 +85,10 @@ func (p *PlayerWindow) View() string {
 }
 
 func (p *PlayerWindow) PlayerSummary() string {
-	boxWidth := int(float32(p.width) / 4)
+	boxWidth := int(float32(p.width) / 3.5)
+	if boxWidth < 30 {
+		boxWidth = 30
+	}
 	boxHeight := p.height
 	paddingWidth := 2
 	paddingHeight := 1
@@ -113,11 +118,12 @@ func (p *PlayerWindow) PlayerSummary() string {
 		ascii = util.GenerateFallbackASCII(uint(p.width/4-2), uint(p.width/4-2))
 	}
 
-	s = fmt.Sprint(s, strings.Repeat("\u2500", innerWidth), "\n")
+	horizontalRule := strings.Repeat("\u2500", innerWidth)
+	s = fmt.Sprint(s, horizontalRule, "\n")
 	for i := range p.messages {
 		s = fmt.Sprint(s, p.messages[i])
 	}
-	s = fmt.Sprint(s, strings.Repeat("\u2500", innerWidth))
+	s = fmt.Sprint(s, horizontalRule)
 
 	controls := []string{
 		lipgloss.NewStyle().Foreground(lipgloss.Color("14")).Render("Play/Pause → Ctrl+P     "),
