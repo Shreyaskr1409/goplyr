@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/hajimehoshi/go-mp3"
 	"github.com/hajimehoshi/oto/v2"
 )
 
@@ -49,10 +50,17 @@ func (p *Player) PlayFile(filePath string) error {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Println("Error encountered: ", err)
-		return errors.New(fmt.Sprint("Error in opening file as encountered an error: ", err))
+		return errors.New(fmt.Sprint("Error opening file: ", err))
 	}
 
-	p.player = p.audioContext.NewPlayer(file)
+	// Decode MP3 file to raw PCM
+	decoder, err := mp3.NewDecoder(file)
+	if err != nil {
+		log.Println("Error decoding MP3: ", err)
+		return errors.New(fmt.Sprint("Error decoding MP3 file: ", err))
+	}
+
+	p.player = p.audioContext.NewPlayer(decoder)
 
 	go p.playRoutine()
 

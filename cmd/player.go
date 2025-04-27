@@ -61,6 +61,13 @@ func (p *PlayerWindow) Init() tea.Cmd {
 	util.MsgAppendln(&p.messages, fmt.Sprint(keyStyle.Render("ARTIST:  "), " ", p.song.artist))
 	util.MsgAppendln(&p.messages, fmt.Sprint(keyStyle.Render("DURATION:"), " ", p.song.duration))
 
+	audioPlayer, err := player.InitPlayer()
+	if err != nil {
+		log.Println("Failed to initialize audio player:", err)
+	} else {
+		p.audioPlayer = audioPlayer
+	}
+
 	return nil
 }
 
