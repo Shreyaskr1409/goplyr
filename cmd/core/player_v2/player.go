@@ -23,6 +23,9 @@ func InitPlayer() {
 	}
 	defer streamer.Close()
 
+	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
+
+
 	// NOT TO BE CALLED EVERYTIME
 	sr := format.SampleRate
 	speaker.Init(sr, sr.N(time.Second/10))
@@ -30,11 +33,24 @@ func InitPlayer() {
 
 	resampled := beep.Resample(4, format.SampleRate, sr, streamer)
 	// 4 is the quality rate (reasonable in present use-case)
+	// for now I have set both sample rates to be the same for testing
+	// but it is ideal to keep `sr` constant
+
+	// ctrl := &beep.Ctrl{}
 
 	done := make(chan bool)
 	speaker.Play(beep.Seq(resampled, beep.Callback(func() {
 		done <- true // plays the song till done is triggered
 	})))
 
-	<-done
+	for {
+		select {
+		case <-done:
+			return
+		case <-time.After(time.Second):
+			speaker.Lock()
+			log.Println(format.SampleRate.D(streamer.Position()).Round(time.Second))
+			speaker.Unlock()
+		}
+	}
 }
